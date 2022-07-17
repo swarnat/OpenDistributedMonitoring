@@ -1,3 +1,4 @@
+
 # Open Distributed Monitoring
 
 ```
@@ -22,13 +23,18 @@ Also there is currently only one check type: ssl certificate verification
   
   - Slack / Matrix Webhooks
     
-## Setup
+## Setup Controller
 
 Clone the repository and go into **controller**. There you need to clone config.dist.js to config.js and fill required information for mysql database, redis server and slack webhook.  
 Optionally you can change UUID_NAMESPACE, for all generated v5 UUIDs and listing http_port for HTTP admin API.
 If you want to have HTTPs support, please use a reverse proxy in front of the HTTP Api.
 
 After configuration was done, execute one time `node install.js` to configure database or import database.sql into database.  
+
+## Setup Worker
+
+Clone the repository and go into **worker**. There you need to clone config.dist.js to config.js and fill required information for redis server.  
+This is needed to send the results of checks back to controller.  
 
 ## Roadmap
 
