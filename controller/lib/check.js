@@ -148,7 +148,7 @@ export default {
           updateColumns.options = JSON.stringify(updateColumns.options);
 
           updateColumns.id = uuidv5(randomString(), configuration.UUID_NAMESPACE);
-          updateColumns.failed = '0000-00-00 00:00:00';
+          //updateColumns.failed = '0000-00-00 00:00:00';
           
           logger(updateColumns.id, 'Add Check');
 
