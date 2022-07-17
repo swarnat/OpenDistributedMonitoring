@@ -23,6 +23,10 @@ Also there is currently only one check type: ssl certificate verification
   
   - Slack / Matrix Webhooks
     
+### Admin API Docs
+
+https://github.com/swarnat/OpenDistributedMonitoring/wiki
+
 ## Setup Controller
 
 Clone the repository and go into **controller**. There you need to clone config.dist.js to config.js and fill required information for mysql database, redis server and slack webhook.  
