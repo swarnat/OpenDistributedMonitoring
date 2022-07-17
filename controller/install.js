@@ -38,8 +38,8 @@ mysql.connect().then(function() {
         \`id\` varchar(42) NOT NULL,
         \`token\` varchar(66) NOT NULL,
         \`expire\` datetime DEFAULT NULL,
-        PRIMARY KEY (`id`),
-        UNIQUE KEY `token` (`token`)
+        PRIMARY KEY (\`id\`),
+        UNIQUE KEY \`token\` (\`token\`)
       ) ENGINE=InnoDB`);
 
       // Token: OpenDistributedMonitoring
