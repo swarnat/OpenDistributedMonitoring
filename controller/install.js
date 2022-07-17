@@ -14,7 +14,7 @@ mysql.connect().then(function() {
         \`title\` varchar(255) NOT NULL,
         \`options\` text NOT NULL,
         \`interval\` varchar(40) NOT NULL,
-        \`failed\` datetime NOT NULL,
+        \`failed\` datetime NULL,
         \`active\` tinyint(4) NOT NULL,
         \`repeat_job_key\` varchar(100) NOT NULL,
         PRIMARY KEY (\`id\`)

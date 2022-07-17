@@ -60,7 +60,7 @@ export default {
       }
       checkData[checkId].status = 'success';
 
-      let sql = 'UPDATE checks SET status = "success", failed = "0000-00-00 00:00:00" WHERE id = ?';
+      let sql = 'UPDATE checks SET status = "success", failed = NULL WHERE id = ?';
       connection.query(sql, [checkId]);
     }
 
