@@ -11,7 +11,8 @@ var connection = {
 
 const myQueueScheduler = new QueueScheduler('monitor',  { connection: configuration.redis });
 const myQueue = new Queue('monitor',  { connection: configuration.redis });
-  
+
+
 export default {
     async clear() {
         logger('GLOBAL', 'Clear Queue');

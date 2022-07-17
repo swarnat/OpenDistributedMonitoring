@@ -12,20 +12,22 @@ dayjs.extend(relativeTime)
 
 import './lib/http-server.js';
 import './lib/bullmq/results.js';
-
+import dailySummary from './lib/bullmq/daily-summary.js';
 import queue from './lib/bullmq/queue.js';
 
 queue.clear().then(() => {
-  
+
   mysql.connect().then(() => {
     check.getChecks().then((checks) => {
       console.log(checks);            
   
       for(var check of checks) {
   
-        queue.registerCheck(check.id);
+        // queue.registerCheck(check.id);
       }
     })
+
+    dailySummary.reset();
   });
   
 });

@@ -14,6 +14,8 @@ export default {
         port: 6379
     },
     
+    enable_daily_reports: true,
+    
     // random uuid
     UUID_NAMESPACE: '12345678-230b-4050-8b32-4729ddc716c7',
 
