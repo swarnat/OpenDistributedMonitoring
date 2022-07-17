@@ -167,7 +167,7 @@ app.route('/check/:id/report')
                     <div class="container">
                         <h1>Report ${checkData.type.toUpperCase()} Check ${checkData.title}</h1>
                         <div class="alert alert-${checkData.status == 'success' ? 'success' : 'danger'}">Aktueller Status: ${checkData.status}</div>
-                        <div id="chart" style="width:100%;height:250px;"></div>
+                        <div id="chart" style="width:100%;height:330px;border:2px solid #eee;"></div>
                         <table class="table table-condensed">
                             <thead></thead><tr><td>Date / Time</td><td>Latency</td><td>Status</td><td></td></tr></thead>
                             <tbody>${historyList}</tbody>
@@ -180,7 +180,12 @@ app.route('/check/:id/report')
                         Plotly.newPlot( chart, [{
                         x: ${JSON.stringify(x)},
                         y: ${JSON.stringify(y)}, }], {
-                        margin: { t: 0 } } );
+                            yaxis: {
+                                ticksuffix: "ms"
+                            },
+                        height: 300,
+                        width: 1250,
+                        margin: { t: 0, b:80, l:80, r:0, pad:10 } } );
                     </script>                    
                   </body>
                 </html>`;
