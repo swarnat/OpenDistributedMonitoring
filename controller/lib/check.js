@@ -156,8 +156,6 @@ export default {
             async (error) => {
               if (error) throw error;
 
-              //await queue.registerCheck(updateColumns.id);
-
               resolve(updateColumns.id);
           });
         } catch (e) {
@@ -181,6 +179,23 @@ export default {
         }
 
         resolve();
+      });          
+    })
+
+  },
+
+  getHistory(checkId) {
+    let connection = mysql.getConnection();
+
+    return new Promise((resolve) => {
+      let sql = `SELECT * FROM history WHERE checkid = ? ORDER BY created DESC LIMIT 500`;
+
+      connection.query(sql, [checkId], (error, results, fields) => {
+        if (error) {
+          return console.error(error.message);
+        }
+
+        resolve(results);
       });          
     })
 

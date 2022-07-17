@@ -18,7 +18,7 @@ export default function(jobData, successCb, errorCb) {
         valid: false,
         domainmatch: false,
         latency: 0,
-        error: '',
+        text: '',
     };
 
     if(typeof options.url == 'undefined') {
@@ -70,7 +70,7 @@ export default function(jobData, successCb, errorCb) {
             }
 
             if(checkResult.domainmatch === false) {
-                checkResult.error = 'Domain does not match';
+                checkResult.text = 'Domain does not match';
                 return errorCb(checkResult);
             }
 
@@ -79,8 +79,9 @@ export default function(jobData, successCb, errorCb) {
                     var certificateExpirationTimestamp = new Date(certificate.valid_to).getTime();
                     var maxAlloweExpirationTimestamp = new Date().getTime() + (+options.days * 86400 * 1000);
 
+                    checkResult.text = 'Certificate expire ' + certificate.valid_to;
+                                        
                     if(maxAlloweExpirationTimestamp >= certificateExpirationTimestamp) {
-                        checkResult.error = 'Certificate expire ' + certificate.valid_to;
                         return errorCb(checkResult);
                     } else {
                         return successCb(checkResult);
@@ -90,7 +91,7 @@ export default function(jobData, successCb, errorCb) {
                 return successCb(checkResult);
             }
         } else {
-            checkResult.error = 'Invalid certificate';
+            checkResult.text = 'Invalid certificate';
             return errorCb(checkResult);
         }
     });

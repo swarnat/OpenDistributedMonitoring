@@ -12,7 +12,7 @@ new Worker('results', async job => {
           'created': dayjs(job.data.timestamp).format('YYYY-MM-DD HH:mm:ss'),
           'status': job.data.data.success == true ? 'success' : 'fail',
           'latency': job.data.data.latency,
-          'text': job.data.data.error ? job.data.data.error : '',
+          'text': job.data.data.text ? job.data.data.text : '',
         };
   
         // console.log(data);

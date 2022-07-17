@@ -7,6 +7,7 @@ import crypto from 'crypto';
 
 import cors from 'cors'
 import check from './check.js';
+import dayjs from 'dayjs'
 
 
 import configuration from '../config.js';
@@ -24,6 +25,10 @@ var httpServer = http.createServer(app);
 /** Authentication **/
 app.use(async function (req, res, next) {
     var connection = mysql.getConnection();
+    if(req.url, req.url.match(/check\/.+\/report/)) {
+        next();
+        return;
+    }
 
     if(typeof req.headers.auth == 'undefined') {
         var err = new Error('Token not Found');
@@ -65,7 +70,7 @@ app.route('/check')
             for(var i in checks) {
                 checks[i].repeat_job_key = undefined;
             }
-            
+
             res.json(checks);
             res.end();
         });
@@ -133,6 +138,60 @@ app.route('/check/:id')
     })
     ;
 
+app.route('/check/:id/report')
+    .get(function(req, res) {
+        var checkId = req.params.id;
+
+        check.getCheck(req.params.id).then(async (checkData) => {
+
+            check.getHistory(req.params.id).then(history => {
+                var historyList = '';
+
+                var x = [];
+                var y = [];
+                for(var row of history) {
+                    historyList += "<tr><td>" + dayjs(row.created).format('YYYY-MM-DD HH:mm:ss') + "</td><td>" + row.latency + "ms</td><td style='background-color:"+(row.status == "success" ? "#99cc66" : "#f8d7da") + ";'>" + row.status + "</td><td>" + row.text + "</td></tr>";
+                    x.push(row.created);
+                    y.push(row.latency);
+                }
+
+                var html = `<!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <title>Bootstrap demo</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+                  </head>
+                  <body>
+                    <div class="container">
+                        <h1>Report ${checkData.type.toUpperCase()} Check ${checkData.title}</h1>
+                        <div class="alert alert-${checkData.status == 'success' ? 'success' : 'danger'}">Aktueller Status: ${checkData.status}</div>
+                        <div id="chart" style="width:100%;height:250px;"></div>
+                        <table class="table table-condensed">
+                            <thead></thead><tr><td>Date / Time</td><td>Latency</td><td>Status</td><td></td></tr></thead>
+                            <tbody>${historyList}</tbody>
+                        </table>
+                    </div>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+                    <script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script>
+                    <script>
+                        var chart = document.getElementById('chart');
+                        Plotly.newPlot( chart, [{
+                        x: ${JSON.stringify(x)},
+                        y: ${JSON.stringify(y)}, }], {
+                        margin: { t: 0 } } );
+                    </script>                    
+                  </body>
+                </html>`;
+        
+                res.send(html);
+                res.end();
+    
+            });
+        });
+
+    });
 
 
 

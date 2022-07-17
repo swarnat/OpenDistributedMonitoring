@@ -15,16 +15,19 @@ import './lib/bullmq/results.js';
 
 import queue from './lib/bullmq/queue.js';
 
-await queue.clear();
-
-
-mysql.connect().then(() => {
-  check.getChecks().then((checks) => {
-    console.log(checks);            
-
-    for(var check of checks) {
-
-      queue.registerCheck(check.id);
-    }
-  })
+queue.clear().then(() => {
+  
+  mysql.connect().then(() => {
+    check.getChecks().then((checks) => {
+      console.log(checks);            
+  
+      for(var check of checks) {
+  
+        queue.registerCheck(check.id);
+      }
+    })
+  });
+  
 });
+
+
