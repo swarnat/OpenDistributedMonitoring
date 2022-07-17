@@ -43,7 +43,7 @@ mysql.connect().then(function() {
       ) ENGINE=InnoDB`);
 
       // Token: OpenDistributedMonitoring
-      connection.query(`INSERT IGNORE INTO`apitoken` SET id = UUID(), token = "93c17c6d5319e19c34eeff5c9c03706ad53e5c08e8adc3c15eefcc5b0eb3d874", expire = NULL`);
+      connection.query(`INSERT IGNORE INTO \`apitoken\` SET id = UUID(), token = "93c17c6d5319e19c34eeff5c9c03706ad53e5c08e8adc3c15eefcc5b0eb3d874", expire = NULL`);
 
       connection.end();
 });
