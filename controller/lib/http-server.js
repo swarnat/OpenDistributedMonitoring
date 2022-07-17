@@ -25,7 +25,7 @@ var httpServer = http.createServer(app);
 app.use(async function (req, res, next) {
     var connection = mysql.getConnection();
 
-    if(typeof req.headers.auth == 'undefnied') {
+    if(typeof req.headers.auth == 'undefined') {
         var err = new Error('Token not Found');
         err.status = 404;
         next(err);
@@ -62,6 +62,10 @@ app.get('/ping', (request, response) => {
 app.route('/check')
     .get(function(req, res) {
         let checks = check.getChecks().then((checks) => {
+            for(var i in checks) {
+                checks[i].repeat_job_key = undefined;
+            }
+            
             res.json(checks);
             res.end();
         });
@@ -70,6 +74,7 @@ app.route('/check')
         try {
             check.addCheck(req.body).then((checkId) => {
                 check.getCheck(checkId).then((check) => {
+                    check.repeat_job_key = undefined;
                     res.json(check);
                     res.end();
 
@@ -91,6 +96,8 @@ app.route('/check/:id')
         
         let checks = check.getCheck(req.params.id).then((check) => {
             check.id = undefined;
+            check.repeat_job_key = undefined;
+
             res.json(check);
             res.end();
         });
@@ -114,6 +121,8 @@ app.route('/check/:id')
         check.updateCheck(req.params.id, req.body).then(() => {
 
             check.getCheck(req.params.id).then(async (check) => {
+                check.repeat_job_key = undefined;
+
                 res.json(check);
                 res.end();
 
