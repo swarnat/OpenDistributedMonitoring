@@ -32,7 +32,7 @@ export default {
       connection.query(sql, [checkId]);
 
       axios.post(configuration.slack.webhook, {
-          "text": "<b>Failed " + checkData[checkId].type.toUpperCase() + " check</b> " + checkData[checkId].title + ' at ' + dayjs(checkResponse.timestamp).format('lll') + "<br/>" + checkResponse.data.error,
+          "text": "<b>Failed " + checkData[checkId].type.toUpperCase() + " check</b> " + checkData[checkId].title + ' at ' + dayjs(checkResponse.timestamp).format('lll') + "<br/>" + checkResponse.data.text,
           "format": "html",
           "displayName": configuration.slack.displayName,
       });
