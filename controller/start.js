@@ -23,7 +23,7 @@ queue.clear().then(() => {
   
       for(var check of checks) {
   
-        // queue.registerCheck(check.id);
+        queue.registerCheck(check.id);
       }
     })
 
