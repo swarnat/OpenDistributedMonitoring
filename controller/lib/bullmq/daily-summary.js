@@ -4,13 +4,16 @@ import mysql from '../mysql.js';
 import dayjs from 'dayjs'
 import log from '../log.js';
 import axios from 'axios';
+import chalk from 'chalk';
 
-const dailyQueueScheduler = new QueueScheduler('daily',  { connection: configuration.redis });
-const dailyQueue = new Queue('daily',  { connection: configuration.redis });
+console.log(chalk.bgGreenBright.black('Connect to BullMQ Daily Queue: ' + configuration.topic_prefix + 'daily'));
+
+const dailyQueueScheduler = new QueueScheduler(configuration.topic_prefix + 'daily',  { connection: configuration.redis });
+const dailyQueue = new Queue(configuration.topic_prefix + 'daily',  { connection: configuration.redis });
   
 dailyQueue.drain().then(() => {
-    
-    new Worker('daily', job => {
+
+    new Worker(configuration.topic_prefix + 'daily', job => {
         var connection = mysql.getConnection();
     
         try {

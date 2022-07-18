@@ -5,7 +5,7 @@ import successCb from './lib/successCb.js';
 import errorCb from './lib/errorCb.js';
 import configuration from './config.js';
 
-var queueName = 'monitor';
+var queueName = configuration.topic_prefix + 'monitor';
 
 new Worker(queueName, async job => {
 

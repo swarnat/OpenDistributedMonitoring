@@ -15,6 +15,8 @@ import queue from './bullmq/queue.js';
 import errorlog from './errorlog.js';
 import mysql from './mysql.js';
 
+import parser from 'cron-parser';
+
 /** INITIALIZE **/
 const app = express();
 app.use(cors())
@@ -116,6 +118,18 @@ app.route('/check/:id')
         });
     })
     .patch(async function(req, res) {
+        try {
+            var interval = parser.parseExpression(req.body.interval);
+            interval.next().toString();
+        } catch (e) {
+            errorlog(req.params.id, 'Error during Update: ' + e);
+
+            res.json({result: false, error: e.toString() });
+            res.end();
+
+            return;
+        }
+
         try {
             await queue.deregisterCheck(req.params.id);
         } catch (e) {

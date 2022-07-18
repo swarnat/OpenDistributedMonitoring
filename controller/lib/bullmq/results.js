@@ -4,8 +4,11 @@ import logger from '../log.js';
 import dayjs from 'dayjs'
 
 import configuration from '../../config.js';
+import chalk from 'chalk';
 
-new Worker('results', async job => {
+console.log(chalk.bgGreenBright.black('Connect to BullMQ Results Queue: ' + configuration.topic_prefix + 'results'));
+
+new Worker(configuration.topic_prefix + 'results', async job => {
     try {
         let data = {
           'id': job.name,

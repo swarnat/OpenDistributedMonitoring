@@ -1,16 +1,14 @@
 import { Queue, QueueScheduler } from 'bullmq';
+import chalk from 'chalk';
 
 import configuration from '../../config.js';
 import check from '../check.js';
 import logger from '../log.js';
 
-var connection = {
-    host: "localhost",
-    port: 6379
-};
+console.log(chalk.bgGreenBright.black('Connect to BullMQ Queue: ' + configuration.topic_prefix + 'monitor'));
 
-const myQueueScheduler = new QueueScheduler('monitor',  { connection: configuration.redis });
-const myQueue = new Queue('monitor',  { connection: configuration.redis });
+const myQueueScheduler = new QueueScheduler(configuration.topic_prefix + 'monitor',  { connection: configuration.redis });
+const myQueue = new Queue(configuration.topic_prefix + 'monitor',  { connection: configuration.redis });
 
 
 export default {
@@ -27,8 +25,11 @@ export default {
                 }
 
                 logger(checkId, 'Deregister Check');
-                
-                if(checkData.repeat_job_key == '') return;
+
+                if(checkData.repeat_job_key == '') {
+                    resolve();
+                    return;
+                };
 
                 await myQueue.removeRepeatableByKey(checkData.repeat_job_key);
 
