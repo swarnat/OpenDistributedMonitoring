@@ -148,12 +148,12 @@ app.route('/check')
     .post(function(req, res) {
         try {
             check.addCheck(req.body).then((checkId) => {
-                check.getCheck(checkId).then((singleCheck) => {
+                check.getCheck(checkId).then(singleCheck => {
                     singleCheck.repeat_job_key = undefined;
                     res.json(singleCheck);
                     res.end();
 
-                    queue.addSingleCheck(req.params.id);
+                    queue.addSingleCheck(checkId);
 
                     queue.registerCheck(checkId);
                 });
