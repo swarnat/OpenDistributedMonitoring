@@ -70,42 +70,47 @@ export default function(jobData, successCb, errorCb) {
 
     const startTime = new Date().getTime();
 
-    let socket = connect(connectOptions, () => {
-        checkResult.latency = ((new Date().getTime())  - startTime);
+    try {
+        let socket = connect(connectOptions, () => {
+            checkResult.latency = ((new Date().getTime())  - startTime);
 
-        if(socket.authorized === true) {
-            let certificate = socket.getPeerCertificate();
+            if(socket.authorized === true) {
+                let certificate = socket.getPeerCertificate();
 
-            if(certificate && certificate.subject) {
-                checkResult.valid = true;
+                if(certificate && certificate.subject) {
+                    checkResult.valid = true;
 
-                checkResult.domainmatch = checkDomainsMatchCertificate(certificate, destination.hostname);
-            }
+                    checkResult.domainmatch = checkDomainsMatchCertificate(certificate, destination.hostname);
+                }
 
-            if(checkResult.domainmatch === false) {
-                checkResult.text = 'Domain does not match';
+                if(checkResult.domainmatch === false) {
+                    checkResult.text = 'Domain does not match';
+                    return errorCb(checkResult);
+                }
+
+                if(options.days) {
+                    if(certificate.valid_to) {
+                        const certificateExpirationTimestamp = new Date(certificate.valid_to).getTime();
+                        const maxAlloweExpirationTimestamp = new Date().getTime() + (+options.days * 86400 * 1000);
+
+                        checkResult.text = 'Certificate expire ' + certificate.valid_to;
+                                            
+                        if(maxAlloweExpirationTimestamp >= certificateExpirationTimestamp) {
+                            return errorCb(checkResult);
+                        } else {
+                            return successCb(checkResult);
+                        }
+                    }
+                } {
+                    return successCb(checkResult);
+                }
+            } else {
+                checkResult.text = 'Invalid certificate';
                 return errorCb(checkResult);
             }
-
-            if(options.days) {
-                if(certificate.valid_to) {
-                    const certificateExpirationTimestamp = new Date(certificate.valid_to).getTime();
-                    const maxAlloweExpirationTimestamp = new Date().getTime() + (+options.days * 86400 * 1000);
-
-                    checkResult.text = 'Certificate expire ' + certificate.valid_to;
-                                        
-                    if(maxAlloweExpirationTimestamp >= certificateExpirationTimestamp) {
-                        return errorCb(checkResult);
-                    } else {
-                        return successCb(checkResult);
-                    }
-                }
-            } {
-                return successCb(checkResult);
-            }
-        } else {
-            checkResult.text = 'Invalid certificate';
-            return errorCb(checkResult);
-        }
-    });
+        });
+    } catch (e) {
+        checkResult.text = e.toString();
+        return errorCb(checkResult);
+}
 }
