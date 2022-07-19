@@ -21,7 +21,7 @@ dailyQueue.drain().then(() => {
     
             let until = expire.format('YYYY-MM-DD HH:mm:ss');
     
-            connection.query('SELECT COUNT(*) as num FROM history WHERE created > ?', [until], (results) => {
+            connection.query('SELECT COUNT(*) as num FROM history WHERE created > ?', [until], (_error, results, _fields) => {
                 log('SUMMARY', 'Send daily report about ' + results[0].num + ' history records');
     
                 axios.post(configuration.slack.webhook, {

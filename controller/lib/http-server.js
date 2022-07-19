@@ -68,7 +68,7 @@ app.use(async function (req, res, next) {
     } else {
         const hash = crypto.createHash('sha256').update(req.headers.auth).digest('hex');
         
-        connection.query('SELECT id FROM apitoken WHERE token = ? AND (expire IS NULL OR expire > NOW())', [hash], (results) => {
+        connection.query('SELECT id FROM apitoken WHERE token = ? AND (expire IS NULL OR expire > NOW())', [hash], (_error, results, _fields) => {
             if(results.length == 0) {
                 let err = new Error('Token not Found');
                 err.status = 404;
