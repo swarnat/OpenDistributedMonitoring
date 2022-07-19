@@ -43,10 +43,10 @@ export default {
 
     async addSingleCheck(checkId) {
         check.getCheck(checkId).then(async checkData => {
-            console.log(checkData);
+
             if(checkData.active == '1') {
 
-                logger(checkId, 'Register Check');
+                logger(checkId, 'Add single Check');
 
                 myQueue.add(
                     'single-' + checkId,

@@ -11,7 +11,7 @@ console.log(chalk.bgGreenBright.black('Connect to BullMQ Results Queue: ' + conf
 new Worker(configuration.topic_prefix + 'results', async job => {
     try {
         let data = {
-          'id': job.name,
+          'id': job.name.replace('single-', ''),
           'created': dayjs(job.data.timestamp).format('YYYY-MM-DD HH:mm:ss'),
           'status': job.data.data.success ? 'success' : 'fail',
           'latency': job.data.data.latency,
@@ -22,7 +22,7 @@ new Worker(configuration.topic_prefix + 'results', async job => {
       // execute the insert statment
       check.addHistory(data);  
   
-      logger(job.name, job.data.data.latency + ' ms ' + (job.data.data.success ? "Success" : "Fail"));
+      logger(job.name.replace('single-', ''), job.data.data.latency + ' ms ' + (job.data.data.success ? "Success" : "Fail"));
   
       if(data.status == 'fail') {
         check.markFailed(data.id, job.data);  
