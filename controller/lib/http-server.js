@@ -16,6 +16,7 @@ import errorlog from './errorlog.js';
 import mysql from './mysql.js';
 
 import parser from 'cron-parser';
+import apitoken from './apitoken.js';
 
 /** INITIALIZE **/
 const app = express();
@@ -66,6 +67,43 @@ app.get('/ping', (request, response) => {
     response.end();
 });
 
+app.route('/apitoken')
+    .post(function(req, res) {
+        try {
+            if(typeof req.body.token == 'undefined' || req.body.token.length < 7) {
+                res.json({'succcess': false, 'error': 'Please set a token with at least 7 chars.'});
+                res.end();
+                return;
+            }
+
+            apitoken.addToken(req.body.token, req.body.expire).then(() => {
+                res.json({success:true});
+                res.end();
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    })
+    .delete(function(req, res) {
+        try {
+            if(typeof req.body.token == 'undefined' || req.headers.auth == req.body.token) {
+                res.json({'succcess': false, 'error': 'Please set a token, you want to delete within request payload. You cannot delete the token, which authenticate this request.'});
+                res.end();
+
+                return;
+            }
+
+            var hash = crypto.createHash('sha256').update(req.body.token).digest('hex');            
+
+            apitoken.deleteToken(hash).then(() => {
+                res.json({success:true});
+                res.end();
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    });
+
 app.route('/check')
     .get(function(req, res) {
         let checks = check.getChecks().then((checks) => {
@@ -77,6 +115,7 @@ app.route('/check')
             res.end();
         });
     })
+
     .post(function(req, res) {
         try {
             check.addCheck(req.body).then((checkId) => {
@@ -84,6 +123,8 @@ app.route('/check')
                     check.repeat_job_key = undefined;
                     res.json(check);
                     res.end();
+
+                    queue.addSingleCheck(req.params.id);
 
                     queue.registerCheck(checkId);
                 });
@@ -145,7 +186,9 @@ app.route('/check/:id')
                 res.json(check);
                 res.end();
 
-                await queue.registerCheck(req.params.id);
+                queue.addSingleCheck(req.params.id);
+
+                queue.registerCheck(req.params.id);
             });
 
         });
@@ -192,14 +235,16 @@ app.route('/check/:id/report')
                     <script>
                         var chart = document.getElementById('chart');
                         Plotly.newPlot( chart, [{
-                        x: ${JSON.stringify(x)},
-                        y: ${JSON.stringify(y)}, }], {
+                            x: ${JSON.stringify(x)},
+                            y: ${JSON.stringify(y)}, }], {
                             yaxis: {
                                 ticksuffix: "ms"
                             },
-                        height: 300,
-                        width: 1250,
-                        margin: { t: 0, b:80, l:80, r:0, pad:10 } } );
+                            type: 'bar',
+                            height: 300,
+                            width: 1250,
+                            margin: { t: 0, b:80, l:80, r:0, pad:10 } 
+                        });
                     </script>                    
                   </body>
                 </html>`;
