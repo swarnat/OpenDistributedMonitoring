@@ -21,7 +21,7 @@ queue.clear().then(() => {
     check.getChecks().then((checks) => {
       console.log(checks);            
   
-      for(var check of checks) {
+      for(let check of checks) {
   
         queue.registerCheck(check.id);
       }

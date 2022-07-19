@@ -14,8 +14,11 @@
   "license": "GPL",
   "main": "start.js",
   "bin": "start.js",
-  Wor"pkg": {
-    "targets": [ "node14-linux-x64", "node14-win-x64" ],
+  "pkg": {
+    "targets": [
+      "node14-linux-x64",
+      "node14-win-x64"
+    ],
     "outputPath": "dist"
-  }  
+  }
 }

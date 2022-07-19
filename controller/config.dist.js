@@ -22,4 +22,9 @@ export default {
     http_port: 4000,
 
     topic_prefix: "odm1_",
+
+    report_auth: {
+        'username': 'admin',
+        'password': 'odm-report'
+    },
 }

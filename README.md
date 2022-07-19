@@ -27,6 +27,12 @@ Also there is currently only one check type: ssl certificate verification
 
 https://github.com/swarnat/OpenDistributedMonitoring/wiki
 
+## Report View
+
+You can open the following URL within your Browser to get an overview about all checks: {host}:{port}/check/all/report  
+The credentials to access this page, can be configured within config.js.
+
+
 ## Setup Controller
 
 Clone the repository and go into **controller**. There you need to clone config.dist.js to config.js and fill required information for mysql database, redis server and slack webhook.  

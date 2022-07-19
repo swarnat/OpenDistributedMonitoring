@@ -17,6 +17,7 @@ mysql.connect().then(function() {
         \`failed\` datetime NULL,
         \`active\` tinyint(4) NOT NULL,
         \`repeat_job_key\` varchar(100) NOT NULL,
+        \`last_check\` datetime NULL,
         PRIMARY KEY (\`id\`)
       ) ENGINE=InnoDB`);
 

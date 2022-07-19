@@ -17,6 +17,7 @@ import mysql from './mysql.js';
 
 import parser from 'cron-parser';
 import apitoken from './apitoken.js';
+import getAllCheckReports from './getAllCheckReports.js';
 
 /** INITIALIZE **/
 const app = express();
@@ -26,10 +27,38 @@ app.use(express.json());
 var httpServer = http.createServer(app);
 
 /** Authentication **/
+
+
 app.use(async function (req, res, next) {
     var connection = mysql.getConnection();
+
     if(req.url, req.url.match(/check\/.+\/report/)) {
+//      
+        if(typeof req.headers.authorization == 'undefined') {
+            console.log('Report missing Login');            
+
+            res.set('WWW-Authenticate', 'Basic realm="LOGIN"')        ;
+            res.status(401).send('');
+
+            return;
+        }
+
+        let auth = req.headers.authorization.match(/^ *(?:[Bb][Aa][Ss][Ii][Cc]) +([A-Za-z0-9._~+/-]+=*) *$/)[1];
+        let parts = Buffer.from(auth, 'base64').toString().match(/^([^:]*):(.*)$/);
+
+        let username = parts[1];
+        let password = parts[2];
+
+        if(configuration.report_auth.username != username || configuration.report_auth.password != password) {
+            console.log('Report wrong Login');
+            res.set('WWW-Authenticate', 'Basic realm="LOGIN"')        ;
+            res.status(401).send('');
+
+            return;
+        }
+
         next();
+
         return;
     }
 
@@ -103,6 +132,9 @@ app.route('/apitoken')
             console.log(e);
         }
     });
+
+app.route('/metrics')
+
 
 app.route('/check')
     .get(function(req, res) {
@@ -199,6 +231,15 @@ app.route('/check/:id/report')
     .get(function(req, res) {
         var checkId = req.params.id;
 
+        if(checkId == 'all') {
+            getAllCheckReports().then(html => {
+                res.send(html);
+                res.end();
+            })
+
+            return;
+        }
+
         check.getCheck(req.params.id).then(async (checkData) => {
 
             check.getHistory(req.params.id).then(history => {
@@ -235,12 +276,12 @@ app.route('/check/:id/report')
                     <script>
                         var chart = document.getElementById('chart');
                         Plotly.newPlot( chart, [{
+                            width: 4,              
                             x: ${JSON.stringify(x)},
                             y: ${JSON.stringify(y)}, }], {
                             yaxis: {
                                 ticksuffix: "ms"
                             },
-                            type: 'bar',
                             height: 300,
                             width: 1250,
                             margin: { t: 0, b:80, l:80, r:0, pad:10 } 

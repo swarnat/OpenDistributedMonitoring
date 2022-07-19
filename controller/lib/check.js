@@ -37,6 +37,9 @@ export default {
           "displayName": configuration.slack.displayName,
       });
     }
+
+    let sql = 'UPDATE checks SET last_check = ? WHERE id = ?';
+    connection.query(sql, [dayjs(checkResponse.timestamp).format('YYYY-MM-DD HH:mm:ss'), checkId]);
   },
 
   markSuccess(checkId, checkResponse) {
@@ -63,6 +66,9 @@ export default {
       let sql = 'UPDATE checks SET status = "success", failed = NULL WHERE id = ?';
       connection.query(sql, [checkId]);
     }
+
+    let sql = 'UPDATE checks SET last_check = ? WHERE id = ?';
+    connection.query(sql, [dayjs(checkResponse.timestamp).format('YYYY-MM-DD HH:mm:ss'), checkId]);
 
   },
 
@@ -227,7 +233,7 @@ export default {
     let connection = mysql.getConnection();
 
       return new Promise((resolve) => {
-        let sql = `SELECT * FROM checks`;
+        let sql = `SELECT * FROM checks ORDER BY title`;
 
         connection.query(sql, (error, results, fields) => {
           if (error) {
