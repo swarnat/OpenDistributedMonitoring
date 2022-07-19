@@ -1,5 +1,6 @@
 import { Queue, QueueScheduler } from 'bullmq';
 import chalk from 'chalk';
+import dayjs from 'dayjs';
 
 import configuration from '../../config.js';
 import check from '../check.js';
@@ -14,7 +15,7 @@ const myQueue = new Queue(configuration.topic_prefix + 'monitor',  { connection:
 export default {
     async clear() {
         logger('GLOBAL', 'Clear Queue');
-        await myQueue.drain();
+        await myQueue.drain(true);
     },
     async deregisterCheck(checkId) {
         return new Promise((resolve, reject) => {
@@ -39,6 +40,28 @@ export default {
             });
         });
     },
+
+    async addSingleCheck(checkId) {
+        check.getCheck(checkId).then(async checkData => {
+            if(checkData.active == '1') {
+
+                logger(checkId, 'Register Check');
+
+                var checkData = await myQueue.add(
+                    'single-' + checkId,
+                    { 
+                        check: checkData.type,
+                        options: checkData.options, 
+                    }
+                ); 
+
+                await check.updateRepeatJobKey(checkId, checkData.repeatJobKey);
+            }
+
+        })
+
+    },
+
     async registerCheck(checkId) {
         check.getCheck(checkId).then(async checkData => {
             if(checkData.active == '1') {
@@ -48,8 +71,8 @@ export default {
                 var checkData = await myQueue.add(
                     checkId,
                     { 
-                    check: checkData.type,
-                    options: checkData.options, 
+                        check: checkData.type,
+                        options: checkData.options, 
                     },
                     {
                         repeat: {
@@ -59,6 +82,8 @@ export default {
                     },
                 ); 
 
+                logger(checkId, 'Next execution: ' + dayjs(checkData.opts.timestamp + checkData.opts.delay).format('lll'));
+                
                 await check.updateRepeatJobKey(checkId, checkData.repeatJobKey);
             }
 
