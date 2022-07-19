@@ -23,7 +23,7 @@ export default async function() {
                         statusField = "<td style='background-color:#e2e2e2;color:#bcbcbc'><em>Inaktiv</em></td>";
                     }
 
-                    checkList += "<tr><td>" + singleCheck.type.toUpperCase() + "</td><td><a href='/check/" + singleCheck.id + "/report'>" + singleCheck.title + "</a></td><td>" + (singleCheck.last_check != '0000-00-00 00:00:00' ? dayjs(singleCheck.last_check).format('YYYY-MM-DD HH:mm:ss') : 'nie') + "</td>" + statusField + "</tr>";
+                    checkList += "<tr><td>" + singleCheck.type.toUpperCase() + "</td><td><a href='/check/" + singleCheck.id + "/report'>" + singleCheck.title + "</a></td><td>" + (singleCheck.last_check != '0000-00-00 00:00:00' && singleCheck.last_check != '' ? dayjs(singleCheck.last_check).format('YYYY-MM-DD HH:mm:ss') : 'nie') + "</td>" + statusField + "</tr>";
                 }
 
             } catch (e) {
