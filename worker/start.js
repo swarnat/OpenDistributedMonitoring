@@ -5,14 +5,14 @@ import successCb from './lib/successCb.js';
 import errorCb from './lib/errorCb.js';
 import configuration from './config.js';
 
-var queueName = configuration.topic_prefix + 'monitor';
+const queueName = configuration.topic_prefix + 'monitor';
 
 console.log('[' + new Date().toISOString().split('.')[0] + '] Listen to BullMQ Queue: ' + queueName);
 
 new Worker(queueName, async job => {
 
   if(checks[job.data.check] !== 'undefined') {
-        var jobData = {
+        const jobData = {
             'name': job.name,
             'options': job.data.options
         };

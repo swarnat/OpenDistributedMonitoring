@@ -1,9 +1,6 @@
-import { Queue, QueueScheduler, Worker } from 'bullmq';
 import dayjs from 'dayjs'
 import check from './lib/check.js';
 import mysql from './lib/mysql.js';
-import logger from './lib/log.js';
-
 
 import localizedFormat from 'dayjs/plugin/localizedFormat.js'
 import relativeTime from 'dayjs/plugin/relativeTime.js'
@@ -21,9 +18,9 @@ queue.clear().then(() => {
     check.getChecks().then((checks) => {
       console.log(checks);            
   
-      for(let check of checks) {
+      for(let singleCheck of checks) {
   
-        queue.registerCheck(check.id);
+        queue.registerCheck(singleCheck.id);
       }
     })
 

@@ -13,15 +13,15 @@ const dailyQueue = new Queue(configuration.topic_prefix + 'daily',  { connection
   
 dailyQueue.drain().then(() => {
 
-    new Worker(configuration.topic_prefix + 'daily', job => {
-        var connection = mysql.getConnection();
+    new Worker(configuration.topic_prefix + 'daily', () => {
+        const connection = mysql.getConnection();
     
         try {
-            var expire = dayjs().subtract(24, 'hours')
+            const expire = dayjs().subtract(24, 'hours')
     
             let until = expire.format('YYYY-MM-DD HH:mm:ss');
     
-            connection.query('SELECT COUNT(*) as num FROM history WHERE created > ?', [until], (error, results, fields) => {
+            connection.query('SELECT COUNT(*) as num FROM history WHERE created > ?', [until], (results) => {
                 log('SUMMARY', 'Send daily report about ' + results[0].num + ' history records');
     
                 axios.post(configuration.slack.webhook, {
@@ -45,7 +45,7 @@ dailyQueue.drain().then(() => {
 
 export default {
     reset: function() {
-        if(configuration.enable_daily_reports == true) {
+        if(configuration.enable_daily_reports) {
             log('GLOBAL', 'Register daily summary');
 
             dailyQueue.add(

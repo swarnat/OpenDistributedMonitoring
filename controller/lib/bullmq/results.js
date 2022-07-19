@@ -13,7 +13,7 @@ new Worker(configuration.topic_prefix + 'results', async job => {
         let data = {
           'id': job.name,
           'created': dayjs(job.data.timestamp).format('YYYY-MM-DD HH:mm:ss'),
-          'status': job.data.data.success == true ? 'success' : 'fail',
+          'status': job.data.data.success ? 'success' : 'fail',
           'latency': job.data.data.latency,
           'text': job.data.data.text ? job.data.data.text : '',
         };

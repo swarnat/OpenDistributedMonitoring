@@ -6,9 +6,8 @@ import axios from 'axios';
 import logger from './log.js';
 import { v5 as uuidv5 } from 'uuid';
 import randomString from './randomString.js';
-import queue from './bullmq/queue.js';
 
-var checkData = {};
+let checkData = {};
 
 export default {
   async updateRepeatJobKey(checkId, repeatJobKey) {
@@ -28,8 +27,8 @@ export default {
       console.log('Set failed ' + checkId);
       checkData[checkId].status = 'fail';
 
-      let sql = 'UPDATE checks SET status = "fail", failed = NOW() WHERE id = ?';
-      connection.query(sql, [checkId]);
+      let updateSql = 'UPDATE checks SET status = "fail", failed = NOW() WHERE id = ?';
+      connection.query(updateSql, [checkId]);
 
       axios.post(configuration.slack.webhook, {
           "text": "<b>Failed " + checkData[checkId].type.toUpperCase() + " check</b> " + checkData[checkId].title + ' at ' + dayjs(checkResponse.timestamp).format('lll') + "<br/>" + checkResponse.data.text,
@@ -50,7 +49,7 @@ export default {
       console.log('Set success ' + checkId + ' from status ' +checkData[checkId].status );
 
       if(checkData[checkId].status == 'fail') {
-        var timeRange = dayjs(checkData[checkId].failed).fromNow(true);
+        const timeRange = dayjs(checkData[checkId].failed).fromNow(true);
 
         console.log('recover ' + checkId + ' after ' + timeRange);
 
@@ -63,8 +62,8 @@ export default {
       }
       checkData[checkId].status = 'success';
 
-      let sql = 'UPDATE checks SET status = "success", failed = NULL WHERE id = ?';
-      connection.query(sql, [checkId]);
+      let updateSQL = 'UPDATE checks SET status = "success", failed = NULL WHERE id = ?';
+      connection.query(updateSQL, [checkId]);
     }
 
     let sql = 'UPDATE checks SET last_check = ? WHERE id = ?';
@@ -94,9 +93,9 @@ export default {
     return new Promise((resolve) => {
       let updatableColumns = ['title', 'options', 'interval', 'active'];
 
-      var updateColumns = {};
+      let updateColumns = {};
 
-      for(var i of updatableColumns) {
+      for(let i of updatableColumns) {
         if(typeof update[i] != 'undefined') updateColumns[i] = update[i];
       }
       
@@ -117,14 +116,11 @@ export default {
   },
 
   registerJob(checkId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((reject) => {
       if(typeof checkData[checkId] == 'undefined') {
         reject('Check ID not found');
-        return;
       }
-  
-
-    })
+    });
   },
 
   addCheck(update) {
@@ -134,7 +130,7 @@ export default {
         try {        
           let updatableColumns = ['title', 'options', 'interval', 'active', 'type'];
 
-          var updateColumns = {
+          let updateColumns = {
             title: 'New Check',
             active: 0,
             interval: "0 0 0 * * *",
@@ -142,7 +138,7 @@ export default {
             repeat_job_key: '',
           };
 
-          for(var i of updatableColumns) {
+          for(let i of updatableColumns) {
             if(typeof update[i] != 'undefined') updateColumns[i] = update[i];
           }
           
@@ -154,7 +150,6 @@ export default {
           updateColumns.options = JSON.stringify(updateColumns.options);
 
           updateColumns.id = uuidv5(randomString(), configuration.UUID_NAMESPACE);
-          //updateColumns.failed = '0000-00-00 00:00:00';
           
           logger(updateColumns.id, 'Add Check');
 
@@ -179,7 +174,7 @@ export default {
     return new Promise((resolve) => {
       let sql = `DELETE FROM checks WHERE id = ?`;
 
-      connection.query(sql, [checkId], (error, results, fields) => {
+      connection.query(sql, [checkId], (error) => {
         if (error) {
           return console.error(error.message);
         }
@@ -196,7 +191,7 @@ export default {
     return new Promise((resolve) => {
       let sql = `SELECT * FROM history WHERE checkid = ? ORDER BY created DESC LIMIT 500`;
 
-      connection.query(sql, [checkId], (error, results, fields) => {
+      connection.query(sql, [checkId], (error, results) => {
         if (error) {
           return console.error(error.message);
         }
@@ -213,12 +208,12 @@ export default {
     return new Promise((resolve) => {
       let sql = `SELECT * FROM checks WHERE id = ?`;
 
-      connection.query(sql, [checkId], (error, results, fields) => {
+      connection.query(sql, [checkId], (error, results) => {
         if (error) {
           return console.error(error.message);
         }
 
-        for(var check of results) {
+        for(let check of results) {
           check.options = JSON.parse(check.options);
           checkData[check.id] = check;
         }
@@ -235,12 +230,12 @@ export default {
       return new Promise((resolve) => {
         let sql = `SELECT * FROM checks ORDER BY title`;
 
-        connection.query(sql, (error, results, fields) => {
+        connection.query(sql, (error, results) => {
           if (error) {
             return console.error(error.message);
           }
 
-          for(var check of results) {
+          for(let check of results) {
             check.options = JSON.parse(check.options);
             checkData[check.id] = check;
           }

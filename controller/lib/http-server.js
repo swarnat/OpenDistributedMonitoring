@@ -24,15 +24,15 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 
-var httpServer = http.createServer(app);
+const httpServer = http.createServer(app);
 
 /** Authentication **/
 
 
 app.use(async function (req, res, next) {
-    var connection = mysql.getConnection();
+    let connection = mysql.getConnection();
 
-    if(req.url, req.url.match(/check\/.+\/report/)) {
+    if(req.url && req.url.match(/check\/.+\/report/)) {
 //      
         if(typeof req.headers.authorization == 'undefined') {
             console.log('Report missing Login');            
@@ -63,35 +63,32 @@ app.use(async function (req, res, next) {
     }
 
     if(typeof req.headers.auth == 'undefined') {
-        var err = new Error('Token not Found');
+        let err = new Error('Token not Found');
         err.status = 404;
         next(err);
     } else {
-        var hash = crypto.createHash('sha256').update(req.headers.auth).digest('hex');
+        const hash = crypto.createHash('sha256').update(req.headers.auth).digest('hex');
         
-        connection.query('SELECT id FROM apitoken WHERE token = ? AND (expire IS NULL OR expire > NOW())', [hash], (error, results, fields) => {
+        connection.query('SELECT id FROM apitoken WHERE token = ? AND (expire IS NULL OR expire > NOW())', [hash], (results) => {
             if(results.length == 0) {
-                var err = new Error('Token not Found');
+                let err = new Error('Token not Found');
                 err.status = 404;
                 next(err);
             } else {
                 next();
             }
         });
-
-        //console.log(result);
     }
-    //console.log(req.headers.auth);
 
   });
-  app.use(function (err, req, res, next) {
+  app.use(function (err, res) {
     res.status(err.status || 500);
     res.send(err.message);
   });
 
 /** ROUTES **/
 
-app.get('/ping', (request, response) => {
+app.get('/ping', (response) => {
     response.send('pong');
     response.end();
 });
@@ -122,7 +119,7 @@ app.route('/apitoken')
                 return;
             }
 
-            var hash = crypto.createHash('sha256').update(req.body.token).digest('hex');            
+            const hash = crypto.createHash('sha256').update(req.body.token).digest('hex');            
 
             apitoken.deleteToken(hash).then(() => {
                 res.json({success:true});
@@ -137,9 +134,9 @@ app.route('/metrics')
 
 
 app.route('/check')
-    .get(function(req, res) {
-        let checks = check.getChecks().then((checks) => {
-            for(var i in checks) {
+    .get(function( res) {
+        check.getChecks().then((checks) => {
+            for(let i in checks) {
                 checks[i].repeat_job_key = undefined;
             }
 
@@ -151,9 +148,9 @@ app.route('/check')
     .post(function(req, res) {
         try {
             check.addCheck(req.body).then((checkId) => {
-                check.getCheck(checkId).then((check) => {
-                    check.repeat_job_key = undefined;
-                    res.json(check);
+                check.getCheck(checkId).then((singleCheck) => {
+                    singleCheck.repeat_job_key = undefined;
+                    res.json(singleCheck);
                     res.end();
 
                     queue.addSingleCheck(req.params.id);
@@ -174,25 +171,25 @@ app.route('/check')
 app.route('/check/:id')
     .get(function(req, res) {
         
-        let checks = check.getCheck(req.params.id).then((check) => {
-            check.id = undefined;
-            check.repeat_job_key = undefined;
+        check.getCheck(req.params.id).then((singleCheck) => {
+            singleCheck.id = undefined;
+            singleCheck.repeat_job_key = undefined;
 
-            res.json(check);
+            res.json(singleCheck);
             res.end();
         });
     })
     .delete(async function(req, res) {
         await queue.deregisterCheck(req.params.id);
 
-        let checks = check.deleteCheck(req.params.id).then(() => {
+        check.deleteCheck(req.params.id).then(() => {
             res.json({'success': true});
             res.end();
         });
     })
     .patch(async function(req, res) {
         try {
-            var interval = parser.parseExpression(req.body.interval);
+            let interval = parser.parseExpression(req.body.interval);
             interval.next().toString();
         } catch (e) {
             errorlog(req.params.id, 'Error during Update: ' + e);
@@ -212,10 +209,10 @@ app.route('/check/:id')
 
         check.updateCheck(req.params.id, req.body).then(() => {
 
-            check.getCheck(req.params.id).then(async (check) => {
-                check.repeat_job_key = undefined;
+            check.getCheck(req.params.id).then(async (singleCheck) => {
+                singleCheck.repeat_job_key = undefined;
 
-                res.json(check);
+                res.json(singleCheck);
                 res.end();
 
                 queue.addSingleCheck(req.params.id);
@@ -229,7 +226,7 @@ app.route('/check/:id')
 
 app.route('/check/:id/report')
     .get(function(req, res) {
-        var checkId = req.params.id;
+        const checkId = req.params.id;
 
         if(checkId == 'all') {
             getAllCheckReports().then(html => {
@@ -243,17 +240,17 @@ app.route('/check/:id/report')
         check.getCheck(req.params.id).then(async (checkData) => {
 
             check.getHistory(req.params.id).then(history => {
-                var historyList = '';
+                let historyList = '';
 
-                var x = [];
-                var y = [];
-                for(var row of history) {
+                let x = [];
+                let y = [];
+                for(let row of history) {
                     historyList += "<tr><td>" + dayjs(row.created).format('YYYY-MM-DD HH:mm:ss') + "</td><td>" + row.latency + "ms</td><td style='background-color:"+(row.status == "success" ? "#99cc66" : "#f8d7da") + ";'>" + row.status + "</td><td>" + row.text + "</td></tr>";
                     x.push(row.created);
                     y.push(row.latency);
                 }
 
-                var html = `<!doctype html>
+                const html = `<!doctype html>
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">

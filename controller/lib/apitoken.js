@@ -13,7 +13,7 @@ export default {
         let connection = mysql.getConnection();
 
         return new Promise(resolve => {
-            var data = {
+            let data = {
                 id: uuidv5(randomString(), configuration.UUID_NAMESPACE),
                 token: crypto.createHash('sha256').update(token).digest('hex'),
             };

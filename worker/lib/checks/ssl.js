@@ -1,16 +1,44 @@
 import { parse as urlParse } from 'url';
 import { connect } from 'tls';
-import { Console } from 'console';
 
-var localJobinfo = {
+const localJobinfo = {
     timeout: 10000,
     url: '',
     // days: 100,    
     days: 32,    
 };
 
+
+/**
+ * Check if the certificate data you set with the domain Name
+ * 
+ * @param {PeerCertificate} certificate 
+ * @param {string} domainName 
+ */
+function checkDomainsMatchCertificate(certificate, checkDomainName) {
+    checkDomainName = checkDomainName.toLowerCase();
+
+    let mainCertDomain = certificate.subject.CN.toLowerCase();
+
+    if(checkDomainName.toLowerCase() != mainCertDomain){
+
+        if(certificate.subjectaltname) {
+            let certAlternativeNames = certificate.subjectaltname.toLowerCase();
+
+            if(certAlternativeNames.indexOf(checkDomainName) >= 0) {
+                return true;
+            }
+        }
+    
+    } else {
+        return true;
+    }
+
+    return false;
+}
+
 export default function(jobData, successCb, errorCb) {
-    //console.log(jobData);
+
     let options = Object.assign({}, localJobinfo, jobData.options);
 
     let checkResult = {
@@ -40,33 +68,18 @@ export default function(jobData, successCb, errorCb) {
 
     console.log('Start SSL Check ' + destination.hostname);
 
-    var startTime = new Date().getTime();
+    const startTime = new Date().getTime();
 
-    let socket = connect(connectOptions, function(err, response) {
+    let socket = connect(connectOptions, () => {
         checkResult.latency = ((new Date().getTime())  - startTime);
 
         if(socket.authorized === true) {
-
             let certificate = socket.getPeerCertificate();
 
             if(certificate && certificate.subject) {
                 checkResult.valid = true;
 
-                let mainCertDomain = certificate.subject.CN.toLowerCase();
-
-                if(destination.hostname.toLowerCase() != mainCertDomain){
-
-                    if(certificate.subjectaltname) {
-                        let certAlternativeNames = certificate.subjectaltname.toLowerCase();
-
-                        if(certAlternativeNames.indexOf(destination.hostname) >= 0) {
-                            checkResult.domainmatch = true;
-                        }
-                    }
-                
-                } else {
-                    checkResult.domainmatch = true;
-                }
+                checkResult.domainmatch = checkDomainsMatchCertificate(certificate, destination.hostname);
             }
 
             if(checkResult.domainmatch === false) {
@@ -76,8 +89,8 @@ export default function(jobData, successCb, errorCb) {
 
             if(options.days) {
                 if(certificate.valid_to) {
-                    var certificateExpirationTimestamp = new Date(certificate.valid_to).getTime();
-                    var maxAlloweExpirationTimestamp = new Date().getTime() + (+options.days * 86400 * 1000);
+                    const certificateExpirationTimestamp = new Date(certificate.valid_to).getTime();
+                    const maxAlloweExpirationTimestamp = new Date().getTime() + (+options.days * 86400 * 1000);
 
                     checkResult.text = 'Certificate expire ' + certificate.valid_to;
                                         

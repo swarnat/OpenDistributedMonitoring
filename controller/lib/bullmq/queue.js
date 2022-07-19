@@ -30,7 +30,7 @@ export default {
                 if(checkData.repeat_job_key == '') {
                     resolve();
                     return;
-                };
+                }
 
                 await myQueue.removeRepeatableByKey(checkData.repeat_job_key);
 
@@ -47,15 +47,13 @@ export default {
 
                 logger(checkId, 'Register Check');
 
-                var checkData = await myQueue.add(
+                myQueue.add(
                     'single-' + checkId,
                     { 
                         check: checkData.type,
                         options: checkData.options, 
                     }
                 ); 
-
-                await check.updateRepeatJobKey(checkId, checkData.repeatJobKey);
             }
 
         })
@@ -63,20 +61,20 @@ export default {
     },
 
     async registerCheck(checkId) {
-        check.getCheck(checkId).then(async checkData => {
-            if(checkData.active == '1') {
+        check.getCheck(checkId).then(async singleCheck => {
+            if(singleCheck.active == '1') {
 
                 logger(checkId, 'Register Check');
 
-                var checkData = await myQueue.add(
+                const checkData = await myQueue.add(
                     checkId,
                     { 
-                        check: checkData.type,
-                        options: checkData.options, 
+                        check: singleCheck.type,
+                        options: singleCheck.options, 
                     },
                     {
                         repeat: {
-                            cron: checkData.interval,
+                            cron: singleCheck.interval,
                             limit: 10,
                         },
                     },
