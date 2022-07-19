@@ -75,8 +75,13 @@ export default function(jobData, successCb, errorCb) {
             checkResult.latency = ((new Date().getTime())  - startTime);
 
             if(socket.authorized === true) {
-                let certificate = socket.getPeerCertificate();
-
+                let certificate;
+                try {
+                    certificate = socket.getPeerCertificate();
+                } catch (e) {
+                    console.log(e);
+                }
+console.log('ss', 84);
                 if(certificate && certificate.subject) {
                     checkResult.valid = true;
 
@@ -109,8 +114,13 @@ export default function(jobData, successCb, errorCb) {
                 return errorCb(checkResult);
             }
         });
+
+        socket.on('error', function(err){
+            checkResult.text = err.toString();
+            return errorCb(checkResult);
+          });        
     } catch (e) {
         checkResult.text = e.toString();
         return errorCb(checkResult);
-}
+    }
 }
