@@ -1,16 +1,9 @@
-import { Queue } from 'bullmq';
-
-import configuration from '../config.js';
-
-const resultQueue = new Queue(configuration.topic_prefix + 'results',  { connection: configuration.redis });
-
+import addResults from './add-results.js';
 
 export default function(jobName, errorData) {
-    console.log('ERROR ' + jobName);
+    console.log('[' + jobName + '][' + new Date().toISOString().split('T')[0] + '] Error');
     console.log(errorData);
 
-    resultQueue.add(jobName, {
-        timestamp: new Date().getTime(),
-        data: errorData
-    });    
-}
+   addResults(jobName, errorData);
+
+};
