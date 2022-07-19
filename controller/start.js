@@ -21,6 +21,10 @@ queue.clear().then(() => {
       for(let singleCheck of checks) {
   
         queue.registerCheck(singleCheck.id);
+
+        if(checks.active == '1' && checks.last_check == '') {
+          queue.addSingleCheck(singleCheck.id);
+        }
       }
     })
 
