@@ -4,10 +4,30 @@ import check from "./check.js";
 export default async function() {
     return new Promise(resolve =>  {
         check.getChecks().then(allChecks => {
-    
             let checkList = '';
-            for(let singleCheck of allChecks) {
-                checkList += "<tr><td>" + singleCheck.type.toUpperCase() + "</td><td><a href='/check/" + singleCheck.id + "/report'>" + singleCheck.title + "</a></td><td>" + (singleCheck.last_check != '0000-00-00 00:00:00' ? dayjs(singleCheck.last_check).format('YYYY-MM-DD HH:mm:ss') : 'nie') + "</td><td style='background-color:"+(singleCheck.status == "success" ? "#99cc66" : "#f8d7da") + ";'>" + singleCheck.status + "</td></tr>";
+            
+            try {
+                for(let singleCheck of allChecks) {
+                    let statusField;
+                    
+                    if(singleCheck.active == 1) {
+                        switch(singleCheck.status) {
+                            case 'success':
+                                statusField = "<td style='background-color:#99cc66;'>OK</td>";
+                                break;
+                            case 'fail':
+                                statusField = "<td style='background-color:#f8d7da;'>Fehler</td>";
+                                break;
+                        }
+                    } else {
+                        statusField = "<td style='background-color:#e2e2e2;color:#bcbcbc'><em>Inaktiv</em></td>";
+                    }
+
+                    checkList += "<tr><td>" + singleCheck.type.toUpperCase() + "</td><td><a href='/check/" + singleCheck.id + "/report'>" + singleCheck.title + "</a></td><td>" + (singleCheck.last_check != '0000-00-00 00:00:00' ? dayjs(singleCheck.last_check).format('YYYY-MM-DD HH:mm:ss') : 'nie') + "</td>" + statusField + "</tr>";
+                }
+
+            } catch (e) {
+                console.log(e);
             }
 
             const html = `<!doctype html>
@@ -31,7 +51,6 @@ export default async function() {
             </html>`;
 
             resolve(html);
-            console.log(allChecks);
         });
 
     });

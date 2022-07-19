@@ -28,12 +28,11 @@ const httpServer = http.createServer(app);
 
 /** Authentication **/
 
-
 app.use(async function (req, res, next) {
     let connection = mysql.getConnection();
 
     if(req.url && req.url.match(/check\/.+\/report/)) {
-//      
+        
         if(typeof req.headers.authorization == 'undefined') {
             console.log('Report missing Login');            
 
@@ -81,14 +80,15 @@ app.use(async function (req, res, next) {
     }
 
   });
-  app.use(function (err, res) {
+
+  app.use(function (err, _req, res, _next) {
     res.status(err.status || 500);
     res.send(err.message);
   });
 
 /** ROUTES **/
 
-app.get('/ping', (response) => {
+app.get('/ping', (_req, response) => {
     response.send('pong');
     response.end();
 });
@@ -134,7 +134,7 @@ app.route('/metrics')
 
 
 app.route('/check')
-    .get(function( res) {
+    .get(function(_req, res) {
         check.getChecks().then((checks) => {
             for(let i in checks) {
                 checks[i].repeat_job_key = undefined;
@@ -238,8 +238,8 @@ app.route('/check/:id/report')
         }
 
         check.getCheck(req.params.id).then(async (checkData) => {
-
             check.getHistory(req.params.id).then(history => {
+
                 let historyList = '';
 
                 let x = [];
