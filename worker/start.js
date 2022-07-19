@@ -7,6 +7,8 @@ import configuration from './config.js';
 
 var queueName = configuration.topic_prefix + 'monitor';
 
+console.log('[' + new Date().toISOString().split('.')[0] + '] Listen to BullMQ Queue: ' + queueName);
+
 new Worker(queueName, async job => {
 
   if(checks[job.data.check] !== 'undefined') {
