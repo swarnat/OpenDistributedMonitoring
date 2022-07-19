@@ -22,7 +22,7 @@ queue.clear().then(() => {
   
         queue.registerCheck(singleCheck.id);
 
-        if(singleCheck.active == 1 && singleCheck.last_check == '') {
+        if(singleCheck.active == 1 && singleCheck.last_check == null) {
           queue.addSingleCheck(singleCheck.id);
         }
       }
